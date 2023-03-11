@@ -8,11 +8,22 @@
 # from container3D import Container3D, Cuboid3D, VerticalCylinder3D
 # from ball import Ball, BallCollection
 
+from .container3D import Cuboid3D
+from .random_balls_in_container import random_balls_in_empty_container
 from .version import version
 
 
 def main():
     print(f'Inside main function of simelastic version {version}')
+
+    box = Cuboid3D()
+    balls = random_balls_in_empty_container(
+        container=box,
+        nballs=100,
+        debug=True
+    )
+
+    print(balls)
 
 
 if __name__ == "__main__":

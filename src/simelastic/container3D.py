@@ -3,11 +3,20 @@ import copy
 import math
 import numpy as np
 
-from ball import Ball
-from vector3D import Vector3D
+from .vector3D import Vector3D
+
+from .default_parameters import DEFAULT_BALL_RADIUS
+from .default_parameters import DEFAULT_CUBOID3D_XMIN, DEFAULT_CUBOID3D_XMAX
+from .default_parameters import DEFAULT_CUBOID3D_YMIN, DEFAULT_CUBOID3D_YMAX
+from .default_parameters import DEFAULT_CUBOID3D_ZMIN, DEFAULT_CUBOID3D_ZMAX
+from .default_parameters import DEFAULT_CYLINDER_RADIUS, DEFAULT_CYLINDER_HEIGHT
 
 
 class Container3D(ABC):
+
+    @abstractmethod
+    def new_xyz_for_ball(self, rng, ball_radius=None):
+        raise NotImplementedError("no .new_random_ball method")
 
     @abstractmethod
     def can_host_ball(self, ball_position=None, ball_radius=None):
@@ -19,8 +28,12 @@ class Container3D(ABC):
 
 
 class Cuboid3D(Container3D):
-    def __init__(self, xmin=-5, xmax=5, ymin=-5, ymax=5, zmin=-5, zmax=5):
-        # super().__init__()
+    def __init__(
+            self,
+            xmin=DEFAULT_CUBOID3D_XMIN, xmax=DEFAULT_CUBOID3D_XMAX,
+            ymin=DEFAULT_CUBOID3D_YMIN, ymax=DEFAULT_CUBOID3D_YMAX,
+            zmin=DEFAULT_CUBOID3D_ZMIN, zmax=DEFAULT_CUBOID3D_ZMAX
+    ):
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -41,7 +54,22 @@ class Cuboid3D(Container3D):
         return f'Cuboid3D(xmin={self.xmin}, xmax={self.xmax}, ' + \
                f'ymin={self.ymin}, ymax={self.ymax}, ' + \
                f'zmin={self.zmin}, zmax={self.zmax})'
-     
+
+    def new_xyz_for_ball(self, rng, ball_radius=None):
+        if ball_radius is None:
+            ball_radius = DEFAULT_BALL_RADIUS
+        diameter = 2 * ball_radius
+        if diameter > self.xmax - self.xmin:
+            raise ValueError(f'The ball diameter: {diameter} is larger than the container X size')
+        if diameter > self.ymax - self.ymin:
+            raise ValueError(f'The ball diameter: {diameter} is larger than the container Y size')
+        if diameter > self.zmax - self.zmin:
+            raise ValueError(f'The ball diameter: {diameter} is larger than the container Z size')
+        x = rng.uniform(self.xmin + ball_radius, self.xmax - ball_radius, 1)[0]
+        y = rng.uniform(self.ymin + ball_radius, self.ymax - ball_radius, 1)[0]
+        z = rng.uniform(self.zmin + ball_radius, self.zmax - ball_radius, 1)[0]
+        return Vector3D(x, y, z)
+
     def can_host_ball(self, ball_position=None, ball_radius=None):
         if not isinstance(ball_position, Vector3D):
             raise ValueError(f'position:{ball_position} is not a Vector3D instance')
@@ -68,8 +96,6 @@ class Cuboid3D(Container3D):
         return result
     
     def collision_with_container(self, ball=None, nround=12):
-        if not isinstance(ball, Ball):
-            raise ValueError(f'ball: {ball} is not a Ball instance')
         # collision with wall at x=xmax or x=xmin
         if ball.velocity.x == 0:
             tx = np.infty
@@ -111,8 +137,12 @@ class Cuboid3D(Container3D):
 
 
 class VerticalCylinder3D(Container3D):
-    def __init__(self, radius=5, height=10, base_center_position=Vector3D(0, 0, 0)):
-        # super().__init__()
+    def __init__(
+            self,
+            radius=DEFAULT_CYLINDER_RADIUS,
+            height=DEFAULT_CYLINDER_HEIGHT,
+            base_center_position=Vector3D(0, 0, 0)
+    ):
         self.radius = radius
         self.height = height
         if isinstance(base_center_position, Vector3D):
@@ -130,7 +160,28 @@ class VerticalCylinder3D(Container3D):
         return f'VerticalCylinder3D(radius={self.radius}, ' + \
                f'height={self.height}, ' + \
                f'base_center_position={repr(self.base_center_position)})'
-    
+
+    def new_xyz_for_ball(self, rng, ball_radius=None):
+        if ball_radius is None:
+            ball_radius = DEFAULT_BALL_RADIUS
+        if ball_radius > self.radius:
+            raise ValueError(f'The ball radius: {ball_radius} does not fit within the cylinder radius: {self.radius}')
+        if 2 * ball_radius > self.height:
+            raise ValueError(f'The ball diameter: {2 * ball_radius} does not fit within the cylinder height: {self.height}')
+        loop = True
+        x, y = 0, 0   # avoid PyCharm warning
+        while loop:
+            x = rng.uniform(-self.radius, self.radius, 1)[0]
+            y = rng.uniform(-self.radius, self.radius, 1)[0]
+            rdist = math.sqrt(x * x + y * y)
+            if rdist < self.radius - ball_radius:
+                loop = False
+        z = rng.uniform(ball_radius, self.height - ball_radius, 1)[0]
+        xx = self.base_center_position.x + x
+        yy = self.base_center_position.y + y
+        zz = self.base_center_position.z + z
+        return Vector3D(xx, yy, zz)
+
     def can_host_ball(self, ball_position=None, ball_radius=None):
         if not isinstance(ball_position, Vector3D):
             raise ValueError(f'position: {ball_position} is not a Vector3D instance')
@@ -153,6 +204,4 @@ class VerticalCylinder3D(Container3D):
         return result
     
     def collision_with_container(self, ball=None, nround=12):
-        if not isinstance(ball, Ball):
-            raise ValueError(f'ball: {ball} is not a Ball instance')
         raise ValueError('Still undefined function')

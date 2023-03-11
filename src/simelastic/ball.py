@@ -1,8 +1,10 @@
 import math
 import numpy as np
 
-from container3D import Container3D, Cuboid3D
-from vector3D import Vector3D
+from .container3D import Container3D, Cuboid3D
+from .vector3D import Vector3D
+
+from .default_parameters import DEFAULT_BALL_RADIUS
 
 
 class Ball:
@@ -31,7 +33,7 @@ class Ball:
             raise ValueError(f'velocity={velocity} is not a Vector3D instance')
 
         if radius is None:
-            self.radius = 0.5
+            self.radius = DEFAULT_BALL_RADIUS
         else:
             self.radius = radius
 
