@@ -1,20 +1,26 @@
-class Container3D:
-    def __init__(self):
-        pass
-    
-    def can_host_ball(self, position=None, radius=None):
-        if not isinstance(position, Vector3D):
-            raise ValueError(f'position:{position} is not a Vector3D instance')
-        return self._can_host_ball(position, radius)
-        
-    def collision_with_container(self, ball=None):
-        if not isinstance(ball, Ball):
-            raise ValueError(f'ball: {ball} is not a Ball instance')
-        return self._collision_with_container(ball)
+from abc import ABC, abstractmethod
+import copy
+import math
+import numpy as np
+
+from ball import Ball
+from vector3D import Vector3D
+
+
+class Container3D(ABC):
+
+    @abstractmethod
+    def can_host_ball(self, ball_position=None, ball_radius=None):
+        raise NotImplementedError("no .can_host_ball method")
+
+    @abstractmethod
+    def collision_with_container(self, ball=None, nround=12):
+        raise NotImplementedError("no .collision_with_container method")
 
 
 class Cuboid3D(Container3D):
     def __init__(self, xmin=-5, xmax=5, ymin=-5, ymax=5, zmin=-5, zmax=5):
+        # super().__init__()
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -36,7 +42,11 @@ class Cuboid3D(Container3D):
                f'ymin={self.ymin}, ymax={self.ymax}, ' + \
                f'zmin={self.zmin}, zmax={self.zmax})'
      
-    def _can_host_ball(self, ball_position, ball_radius):
+    def can_host_ball(self, ball_position=None, ball_radius=None):
+        if not isinstance(ball_position, Vector3D):
+            raise ValueError(f'position:{ball_position} is not a Vector3D instance')
+        if ball_radius is None:
+            raise ValueError(f'invalid ball radius: {ball_radius}')
         result = True
         if ball_position.x - ball_radius < self.xmin:
             result = False
@@ -57,7 +67,9 @@ class Cuboid3D(Container3D):
                                 result = False                
         return result
     
-    def _collision_with_container(self, ball, nround=12):
+    def collision_with_container(self, ball=None, nround=12):
+        if not isinstance(ball, Ball):
+            raise ValueError(f'ball: {ball} is not a Ball instance')
         # collision with wall at x=xmax or x=xmin
         if ball.velocity.x == 0:
             tx = np.infty
@@ -97,8 +109,10 @@ class Cuboid3D(Container3D):
                 future_ball.velocity.z = -future_ball.velocity.z
         return tmin, future_ball
 
+
 class VerticalCylinder3D(Container3D):
     def __init__(self, radius=5, height=10, base_center_position=Vector3D(0, 0, 0)):
+        # super().__init__()
         self.radius = radius
         self.height = height
         if isinstance(base_center_position, Vector3D):
@@ -117,7 +131,11 @@ class VerticalCylinder3D(Container3D):
                f'height={self.height}, ' + \
                f'base_center_position={repr(self.base_center_position)})'
     
-    def _can_host_ball(self, ball_position, ball_radius):
+    def can_host_ball(self, ball_position=None, ball_radius=None):
+        if not isinstance(ball_position, Vector3D):
+            raise ValueError(f'position: {ball_position} is not a Vector3D instance')
+        if ball_radius is None:
+            raise ValueError(f'invalid ball radius: {ball_radius}')
         result = True
         if ball_position.z + ball_radius > self.base_center_position.z + self.height:
             result = False
@@ -134,5 +152,7 @@ class VerticalCylinder3D(Container3D):
                     result = False
         return result
     
-    def _collision_with_container(self, ball):
+    def collision_with_container(self, ball=None, nround=12):
+        if not isinstance(ball, Ball):
+            raise ValueError(f'ball: {ball} is not a Ball instance')
         raise ValueError('Still undefined function')
