@@ -1,3 +1,4 @@
+import copy
 import math
 import numpy as np
 
@@ -168,11 +169,31 @@ class BallCollection:
         output += f'    nballs = {self.nballs}'
         return output
 
+    def __add__(self, bc):
+        if isinstance(bc, BallCollection):
+            nballs_bc = bc.nballs
+            if nballs_bc == 0:
+                return self
+            for i in range(nballs_bc):
+                newball = bc.dict[i]
+                if self.check_ball_overlap(newball, warning=True):
+                    self.dict[self.nballs] = copy.deepcopy(newball)
+                    self.nballs += 1
+                else:
+                    raise ValueError('Overlap between balls')
+        elif isinstance(bc, Ball):
+            if self.check_ball_overlap(bc, warning=True):
+                self.dict[self.nballs] = copy.deepcopy(bc)
+                self.nballs += 1
+        else:
+            raise ValueError(f'bc: {type(bc)} is not a BallCollection instance')
+        return self
+
     def add_single(self, newball, warning=True):
         if not isinstance(newball, Ball):
             raise ValueError(f'newball: {newball} is not a Ball instance')
         if self.check_ball_overlap(newball, warning=warning):
-            self.dict[self.nballs] = newball
+            self.dict[self.nballs] = copy.deepcopy(newball)
             self.nballs += 1
             return True
         else:
@@ -185,7 +206,7 @@ class BallCollection:
             if not isinstance(newball, Ball):
                 raise ValueError(f'newball: {newball} is not a Ball instance')
             if self.check_ball_overlap(newball):
-                self.dict[self.nballs] = newball
+                self.dict[self.nballs] = copy.deepcopy(newball)
                 self.nballs += 1
 
     def check_ball_overlap(self, newball, warning=True):
