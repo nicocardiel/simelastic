@@ -18,11 +18,11 @@ from .container3D import Container3D, Cuboid3D
 def time_rendering(
         dict_snapshots=None,
         container=None,
-        outfilename=None,
         tmin=None,
         tmax=None,
         tstep=1,
         ndelay_start=500,
+        outfilename=None,
         camera_phi=45,
         camera_theta=30,
         camera_r=25,
@@ -64,7 +64,7 @@ def time_rendering(
         f = interp1d(tvalues, np.array((xval, yval, zval)))
         finterp_balls.append(f)
 
-    print(f'Opening: {outfilename}')
+    print(f'Creating: {outfilename}')
     f = open(outfilename, 'wt')
 
     f.write("""
