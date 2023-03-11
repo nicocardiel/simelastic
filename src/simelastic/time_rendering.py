@@ -1,6 +1,6 @@
 import numpy as np
-from tqdm import tqdm
 from scipy.interpolate import interp1d
+from tqdm import tqdm
 
 from .container3D import Container3D, Cuboid3D
 
@@ -9,7 +9,10 @@ def time_rendering(
         dict_snapshots=None,
         container=None,
         outfilename=None,
-        time_resolution=100,
+        tmin=None,
+        tmax=None,
+        tstep=1,
+        ndelay_start=500,
         debug=False
 ):
     if not isinstance(dict_snapshots, dict):
@@ -18,15 +21,24 @@ def time_rendering(
         raise ValueError(f'container: {container} is not a Container3D instance')
     if outfilename is None:
         raise ValueError(f'Undefined outfilename')
-    if time_resolution is None:
-        raise ValueError(f'Undefined time_resolution')
+    if tstep is None:
+        raise ValueError(f'Undefined tstep')
 
     tvalues = np.array([t for t in dict_snapshots.keys()])
     if debug:
         print(f'Number of frames in dict_snapshots: {len(tvalues)}')
 
-    tmin = tvalues.min()
-    tmax = tvalues.max()
+    if tmin is None:
+        tmin = min(tvalues)
+    if tmax is None:
+        tmax = max(tvalues)
+    tarray = np.arange(tmin, tmax, tstep)
+
+    if debug:
+        print(f'tmin............: {tmin}')
+        print(f'tmax............: {tmax}')
+        print(f'tstep...........: {tstep}')
+        print(f'number of frames: {len(tarray)}')
 
     nballs = dict_snapshots[tmin].nballs
 
@@ -159,11 +171,13 @@ Frame = <span id=d3></span>
         scene.add( ball );
         """)
 
-    f.write("""
+    f.write(f"""
         // ---------------------------
 
-        var nframe = -600;
+        var nframe = -{ndelay_start};
+""")
 
+    f.write("""
         function render() {
                 requestAnimationFrame( render );
                 renderer.render( scene, camera );
@@ -177,8 +191,6 @@ Frame = <span id=d3></span>
                 };
 """)
 
-    tarray = np.arange(tmin, tmax, time_resolution)
-
     print('- Creating frames')
 
     for k in tqdm(range(len(tarray))):
@@ -189,7 +201,6 @@ Frame = <span id=d3></span>
             fvalues = fball(t)
             f.write(f'                    balls[{i}].position.set( {fvalues[0]}, {fvalues[1]}, {fvalues[2]} );\n')
         f.write('                }\n')
-
 
     f.write("""
                 // ---

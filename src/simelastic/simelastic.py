@@ -6,7 +6,7 @@ from .version import version
 
 
 def main():
-    print(f'Inside main function of simelastic version {version}')
+    print(f'Welcome to simelastic version {version}')
 
     box = Cuboid3D()
 
@@ -18,17 +18,18 @@ def main():
     )
 
     dict_snapshots = run_simulation(
-            dict_snapshots=None,
-            balls=balls,
-            time_interval=1000,
-            debug=False
+        dict_snapshots=None,
+        balls=balls,
+        time_interval=1000,
+        debug=False
     )
 
     time_rendering(
-            dict_snapshots=dict_snapshots,
-            container=box,
-            outfilename='zzz.html',
-            debug=True
+        dict_snapshots=dict_snapshots,
+        container=box,
+        tstep=0.5,
+        outfilename='zzz.html',
+        debug=True
     )
 
 if __name__ == "__main__":
