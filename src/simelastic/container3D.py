@@ -14,6 +14,9 @@ from .default_parameters import DEFAULT_CYLINDER_RADIUS, DEFAULT_CYLINDER_HEIGHT
 
 class Container3D(ABC):
 
+    def __init__(self):
+        self.type = None
+
     @abstractmethod
     def new_xyz_for_ball(self, rng, ball_radius=None):
         raise NotImplementedError("no .new_random_ball method")
@@ -34,15 +37,17 @@ class Cuboid3D(Container3D):
             ymin=DEFAULT_CUBOID3D_YMIN, ymax=DEFAULT_CUBOID3D_YMAX,
             zmin=DEFAULT_CUBOID3D_ZMIN, zmax=DEFAULT_CUBOID3D_ZMAX
     ):
+        super().__init__()
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
         self.zmin = zmin
         self.zmax = zmax
+        self.type = 'Cuboid3D'
         
     def __str__(self):
-        return '<Cuboid3D instance>\n' + \
+        return f'<{self.type} instance>\n' + \
               f'    xmin = {self.xmin}\n' + \
               f'    xmax = {self.xmax}\n' + \
               f'    ymin = {self.ymin}\n' + \
@@ -51,7 +56,7 @@ class Cuboid3D(Container3D):
               f'    zmax = {self.zmax}'
     
     def __repr__(self):
-        return f'Cuboid3D(xmin={self.xmin}, xmax={self.xmax}, ' + \
+        return f'{self.type}(xmin={self.xmin}, xmax={self.xmax}, ' + \
                f'ymin={self.ymin}, ymax={self.ymax}, ' + \
                f'zmin={self.zmin}, zmax={self.zmax})'
 
@@ -143,21 +148,23 @@ class VerticalCylinder3D(Container3D):
             height=DEFAULT_CYLINDER_HEIGHT,
             base_center_position=Vector3D(0, 0, 0)
     ):
+        super().__init__()
         self.radius = radius
         self.height = height
         if isinstance(base_center_position, Vector3D):
             self.base_center_position = base_center_position
         else:
             raise ValueError(f'base_center_position: {base_center_position} is not a Vector3D instance')
+        self.type = 'VerticalCylinder3D'
             
     def __str__(self):
-        return '<VerticalCylinder3D instance>\n' + \
+        return f'<{self.type} instance>\n' + \
               f'    radius = {self.radius}\n' + \
               f'    height = {self.height}\n' + \
               f'    base_center_position = {self.base_center_position}'
     
     def __repr__(self):
-        return f'VerticalCylinder3D(radius={self.radius}, ' + \
+        return f'{self.type}(radius={self.radius}, ' + \
                f'height={self.height}, ' + \
                f'base_center_position={repr(self.base_center_position)})'
 
@@ -167,7 +174,8 @@ class VerticalCylinder3D(Container3D):
         if ball_radius > self.radius:
             raise ValueError(f'The ball radius: {ball_radius} does not fit within the cylinder radius: {self.radius}')
         if 2 * ball_radius > self.height:
-            raise ValueError(f'The ball diameter: {2 * ball_radius} does not fit within the cylinder height: {self.height}')
+            raise ValueError(f'The ball diameter: {2 * ball_radius} does not fit ' +
+                             f'within the cylinder height: {self.height}')
         loop = True
         x, y = 0, 0   # avoid PyCharm warning
         while loop:

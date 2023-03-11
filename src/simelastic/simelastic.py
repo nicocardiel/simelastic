@@ -13,7 +13,7 @@ def main():
     balls = random_balls_in_empty_container(
         container=box,
         nballs=50,
-        random_speed=0.1,
+        random_speed=0.05,
         debug=False
     )
 

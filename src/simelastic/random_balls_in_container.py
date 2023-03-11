@@ -13,6 +13,7 @@ def random_balls_in_empty_container(
         nballs=1,
         radius=None,
         random_speed=0,
+        random_colors=True,
         seed=1234,
         debug=False
 ):
@@ -37,7 +38,19 @@ def random_balls_in_empty_container(
             vz = random_speed * math.sin(theta)
         position = container.new_xyz_for_ball(rng)
         velocity = Vector3D(vx, vy, vz)
-        b = Ball(position=position, radius=radius, velocity=velocity, container=container)
+        if random_colors:
+            rgbcolor = Vector3D(rng.uniform(0, 1, 1)[0],
+                                rng.uniform(0, 1, 1)[0],
+                                rng.uniform(0, 1, 1)[0])
+        else:
+            rgbcolor = Vector3D(1, 0, 0)
+        b = Ball(
+            position=position,
+            radius=radius,
+            velocity=velocity,
+            rgbcolor=rgbcolor,
+            container=container
+        )
         ntrials += 1
         if debug:
             print(f'Inserting ball #{nb} (trial#{ntrials})')
@@ -48,6 +61,6 @@ def random_balls_in_empty_container(
             raise ValueError('Too many attempts to insert ball within container')
 
     if not debug:
-        print(f'{nballs} balls randomly inserted in empty container {container}')
+        print(f'{nballs} balls randomly inserted in empty container {container.type}')
 
     return balls
