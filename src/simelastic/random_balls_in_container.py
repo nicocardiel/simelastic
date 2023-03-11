@@ -47,4 +47,7 @@ def random_balls_in_empty_container(
         if ntrials > 10 * nballs:
             raise ValueError('Too many attempts to insert ball within container')
 
+    if not debug:
+        print(f'{nballs} balls randomly inserted in empty container {container}')
+
     return balls
