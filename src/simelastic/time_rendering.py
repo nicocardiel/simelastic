@@ -13,6 +13,9 @@ def time_rendering(
         tmax=None,
         tstep=1,
         ndelay_start=500,
+        camera_phi=45,
+        camera_theta=30,
+        camera_r=25,
         debug=False
 ):
     if not isinstance(dict_snapshots, dict):
@@ -79,21 +82,25 @@ Frame = <span id=d3></span>
 <!-- See https://exploratoria.github.io/exhibits/mechanics/elastic-collisions-in-3d/ -->
 <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/examples/js/controls/OrbitControls.js"></script>
+""")
 
+    f.write(f"""
 <script>
 
         var deg2rad = Math.PI/180;
 
         // camera location
-        var camera_phi = 45; 
-        var camera_theta = 30 * deg2rad;
+        var camera_phi = {camera_phi}; 
+        var camera_theta = {camera_theta} * deg2rad;
         var delta_camera_phi = 0;
-        var camera_r = 25;
+        var camera_r = {camera_r};
         // ligth location
         var lightx = -5;
         var lighty = 5;
         var lightz = 0;
+""")
 
+    f.write("""
         // ---------------------------
 
         var scene = new THREE.Scene();

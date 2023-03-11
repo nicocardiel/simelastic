@@ -8,7 +8,7 @@ from .version import version
 def main():
     print(f'Welcome to simelastic version {version}')
 
-    box = Cuboid3D()
+    box = Cuboid3D(xmin=-8, xmax=8)
 
     balls = random_balls_in_empty_container(
         container=box,

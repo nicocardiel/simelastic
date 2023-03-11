@@ -42,7 +42,7 @@ def run_simulation(
             tmp_container_tmin.append(tmin)
             tmp_container_balls.append(b_after_collision_with_container)
         tmp_container_tmin = np.array(tmp_container_tmin)
-        tmin_container = tmp_container_tmin.min()
+        tmin_container = min(tmp_container_tmin)
 
         # next collision with another ball
         tmp_dict_t_ij = dict()
