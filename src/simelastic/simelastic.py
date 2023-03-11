@@ -1,17 +1,7 @@
-# import copy
-# import math
-# import numpy as np
-# from scipy.interpolate import interp1d
-# import sys
-import copy
-
-# from vector3D import Vector3D
-# from container3D import Container3D, Cuboid3D, VerticalCylinder3D
-# from ball import Ball, BallCollection
-
 from .container3D import Cuboid3D
 from .random_balls_in_container import random_balls_in_empty_container
 from .run_simulation import run_simulation
+from .time_rendering import time_rendering
 from .version import version
 
 
@@ -22,7 +12,7 @@ def main():
 
     balls = random_balls_in_empty_container(
         container=box,
-        nballs=3,
+        nballs=50,
         random_speed=0.1,
         debug=False
     )
@@ -34,6 +24,12 @@ def main():
             debug=False
     )
 
+    time_rendering(
+            dict_snapshots=dict_snapshots,
+            container=box,
+            outfilename='zzz.html',
+            debug=True
+    )
 
 if __name__ == "__main__":
 
