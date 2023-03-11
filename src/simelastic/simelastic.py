@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2023 Nicolás Cardiel
+#
+# This file is part of simelastic
+#
+# SPDX-License-Identifier: GPL-3.0+
+# License-Filename: LICENSE
+#
+
 from .container3D import Cuboid3D
 from .random_balls_in_container import random_balls_in_empty_container
 from .run_simulation import run_simulation

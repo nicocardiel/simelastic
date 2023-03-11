@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright 2023 Nicolás Cardiel
+#
+# This file is part of simelastic
+#
+# SPDX-License-Identifier: GPL-3.0+
+# License-Filename: LICENSE
+#
+
 class Vector3D:
     def __init__(self, x=0, y=0, z=0):
         self.x = x
