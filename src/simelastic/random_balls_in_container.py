@@ -23,7 +23,7 @@ def random_balls_in_empty_container(
         nballs=1,
         radius=None,
         random_speed=0,
-        random_colors=True,
+        rgbcolor=None,
         seed=1234,
         debug=False
 ):
@@ -48,12 +48,19 @@ def random_balls_in_empty_container(
             vz = random_speed * math.sin(theta)
         position = container.new_xyz_for_ball(rng)
         velocity = Vector3D(vx, vy, vz)
-        if random_colors:
-            rgbcolor = Vector3D(rng.uniform(0, 1, 1)[0],
-                                rng.uniform(0, 1, 1)[0],
-                                rng.uniform(0, 1, 1)[0])
+        if rgbcolor is None:
+            rgbcolor = Vector3D(0.8, 0.8, 0.8)
+        elif isinstance(rgbcolor, Vector3D):
+            pass
+        elif isinstance(rgbcolor, str):
+            if rgbcolor == 'random':
+                rgbcolor = Vector3D(rng.uniform(0, 1, 1)[0],
+                                    rng.uniform(0, 1, 1)[0],
+                                    rng.uniform(0, 1, 1)[0])
+            else:
+                raise ValueError(f'Unexpected rgbcolor: {rgbcolor}')
         else:
-            rgbcolor = Vector3D(1, 0, 0)
+            raise ValueError(f'Unexpected rgbcolor: {rgbcolor}')
         b = Ball(
             position=position,
             radius=radius,
