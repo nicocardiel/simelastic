@@ -74,7 +74,7 @@ def random_balls_in_empty_container(
         if balls.add_single(b, warning=False):
             nb += 1
             ntrials = 0
-        if ntrials > 10 * nballs:
+        if ntrials > 100 * nballs:
             raise ValueError('Too many attempts to insert ball within container')
 
     if not debug:
