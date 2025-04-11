@@ -46,7 +46,7 @@ def random_balls_in_empty_container(
             vx = random_speed * math.cos(theta) * math.cos(phi)
             vy = random_speed * math.cos(theta) * math.sin(phi)
             vz = random_speed * math.sin(theta)
-        position = container.new_xyz_for_ball(rng)
+        position = container.new_xyz_for_ball(rng, ball_radius=radius)
         velocity = Vector3D(vx, vy, vz)
         if rgbcolor is None:
             rgbcolor = Vector3D(0.8, 0.8, 0.8)

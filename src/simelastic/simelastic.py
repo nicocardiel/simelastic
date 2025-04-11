@@ -36,6 +36,7 @@ def main():
     parser.add_argument("-p", "--pickle", help="Input/Output pickle file name", type=str, default="None")
     parser.add_argument("-o", "--output", help="Output HTML file name", type=str, default="None")
     parser.add_argument("-t", "--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
+    parser.add_argument("--ndelay_start", help="Delay start (default 500)", type=int, default=500)
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -53,10 +54,12 @@ def main():
             raise SystemExit()
         with open(args.pickle, 'rb') as f:
             pickle_object = pickle.load(f)
+        print(f'Number of snapshots: {len(pickle_object['dict_snapshots'])}')
         time_rendering(
             dict_snapshots=pickle_object['dict_snapshots'],
             container=pickle_object['container'],
             tstep=args.tstep,
+            ndelay_start=args.ndelay_start,
             outfilename=args.output,
             debug=True
         )
@@ -83,6 +86,7 @@ def main():
             time_interval=1000,
             debug=False
         )
+        print(f'Number of snapshots: {len(dict_snapshots)}')
         if args.pickle.lower() != 'none':
             pickle_object = {'dict_snapshots': dict_snapshots, 'container': box}
             with open(args.pickle, 'wb') as f:
@@ -93,6 +97,7 @@ def main():
                 dict_snapshots=dict_snapshots,
                 container=box,
                 tstep=args.tstep,
+                ndelay_start=args.ndelay_start,
                 outfilename=args.output,
                 debug=True
             )
@@ -113,6 +118,7 @@ def main():
             time_interval=1000,
             debug=False
         )
+        print(f'Number of snapshots: {len(dict_snapshots)}')
         if args.pickle.lower() != 'none':
             pickle_object = {'dict_snapshots': dict_snapshots, 'container': box}
             with open(args.pickle, 'wb') as f:
@@ -123,6 +129,7 @@ def main():
                 dict_snapshots=dict_snapshots,
                 container=box,
                 tstep=args.tstep,
+                ndelay_start=args.ndelay_start,
                 outfilename=args.output,
                 debug=True
             )
@@ -163,6 +170,7 @@ def main():
             time_interval=1000,
             debug=False
         )
+        print(f'Number of snapshots: {len(dict_snapshots)}')
         if args.pickle.lower() != 'none':
             pickle_object = {'dict_snapshots': dict_snapshots, 'container': box}
             with open(args.pickle, 'wb') as f:
@@ -173,6 +181,7 @@ def main():
                 dict_snapshots=dict_snapshots,
                 container=box,
                 tstep=args.step,
+                ndelay_start=args.ndelay_start,
                 outfilename=args.output,
                 debug=True
             )
@@ -224,6 +233,7 @@ def main():
             time_interval=1000,
             debug=False
         )
+        print(f'Number of snapshots: {len(dict_snapshots)}')
         if args.pickle.lower() != 'none':
             pickle_object = {'dict_snapshots': dict_snapshots, 'container': box}
             with open(args.pickle, 'wb') as f:
@@ -234,37 +244,39 @@ def main():
                 dict_snapshots=dict_snapshots,
                 container=box,
                 tstep=args.step,
+                ndelay_start=args.ndelay_start,
                 outfilename=args.output,
                 debug=True
             )
 
     elif nexample == 5:
-        xmin = -12
-        xmax = 12
+        xmin = -18
+        xmax = 18
         box1 = Cuboid3D(xmin=xmin, xmax=-1, ymin=-1, ymax=1, zmin=-1, zmax=1)
         box2 = Cuboid3D(xmin=-1, xmax=1, ymin=-1, ymax=1, zmin=-1, zmax=1)
         box3 = Cuboid3D(xmin=1, xmax=xmax, ymin=-1, ymax=1, zmin=-1, zmax=1)
         box = Cuboid3D(xmin=xmin, xmax=xmax, ymin=-1, ymax=1, zmin=-1, zmax=1)
+        radius = 0.10
         balls1 = random_balls_in_empty_container(
             container=box1,
-            nballs=11,
-            radius=0.4,
+            nballs=170,
+            radius=radius,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
             debug=False
         )
         balls2 = random_balls_in_empty_container(
             container=box2,
-            nballs=2,
-            radius=0.4,
+            nballs=20,
+            radius=radius,
             random_speed=0.10,
             rgbcolor=Vector3D(1.0, 0.0, 0.0),
             debug=False
         )
         balls3 = random_balls_in_empty_container(
             container=box3,
-            nballs=11,
-            radius=0.4,
+            nballs=170,
+            radius=radius,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
             debug=False
@@ -273,7 +285,7 @@ def main():
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
-            time_interval=1000,
+            time_interval=20,
             debug=False
         )
         for idball in balls.dict:
@@ -282,9 +294,10 @@ def main():
         dict_snapshots = run_simulation(
             dict_snapshots=dict_snapshots,
             balls=balls,
-            time_interval=1000,
+            time_interval=50,
             debug=False
         )
+        print(f'Number of snapshots: {len(dict_snapshots)}')
         if args.pickle.lower() != 'none':
             pickle_object = {'dict_snapshots': dict_snapshots, 'container': box}
             with open(args.pickle, 'wb') as f:
