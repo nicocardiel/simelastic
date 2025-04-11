@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2023 Nicolás Cardiel
+# Copyright 2023-2025 Nicolás Cardiel
 #
 # This file is part of simelastic
 #
@@ -120,7 +120,7 @@ class Ball:
         vy_relative = self.velocity.y - newball.velocity.y
         vz_relative = self.velocity.z - newball.velocity.z
         if (vx_relative == 0) and (vy_relative == 0) and (vz_relative == 0):
-            tmin = np.infty
+            tmin = np.inf
         else:
             delta_x = self.position.x - newball.position.x
             delta_y = self.position.y - newball.position.y
@@ -133,18 +133,18 @@ class Ball:
             c = delta_x ** 2 + delta_y ** 2 + delta_z ** 2 - dcol ** 2
             delta = b * b - 4 * a * c
             if delta <= 0:
-                tmin = np.infty
+                tmin = np.inf
             else:
                 tmin1 = (-b + math.sqrt(delta)) / (2 * a)
                 if tmin1 < 0:
-                    tmin1 = np.infty
+                    tmin1 = np.inf
                 tmin2 = (-b - math.sqrt(delta)) / (2 * a)
                 if tmin2 < 0:
-                    tmin2 = np.infty
+                    tmin2 = np.inf
                 tmin = np.min([tmin1, tmin2])
                 derivative = 2 * a * tmin + b
                 if derivative >= 0:
-                    tmin = np.infty
+                    tmin = np.inf
         return np.round(tmin, nround)
 
     def update_collision_with(self, newball, nround=12):
