@@ -113,21 +113,21 @@ class Cuboid3D(Container3D):
     def collision_with_container(self, ball=None, nround=12):
         # collision with wall at x=xmax or x=xmin
         if ball.velocity.x == 0:
-            tx = np.infty
+            tx = np.inf
         elif ball.velocity.x > 0:
             tx = (self.xmax - ball.radius - ball.position.x) / ball.velocity.x
         else:
             tx = (self.xmin + ball.radius - ball.position.x) / ball.velocity.x
         # collision with wall at y=ymax or y=ymin
         if ball.velocity.y == 0:
-            ty = np.infty
+            ty = np.inf
         elif ball.velocity.y > 0:
             ty = (self.ymax - ball.radius - ball.position.y) / ball.velocity.y
         else:
             ty = (self.ymin + ball.radius - ball.position.y) / ball.velocity.y
         # collision with wall at z=zmax or z=zmin
         if ball.velocity.z == 0:
-            tz = np.infty
+            tz = np.inf
         elif ball.velocity.z > 0:
             tz = (self.zmax - ball.radius - ball.position.z) / ball.velocity.z
         else:
