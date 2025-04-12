@@ -26,6 +26,7 @@ class Ball:
             radius=None,
             mass=None,
             rgbcolor=None,
+            rgbcolor_on_speed=None,
             container=None,
             check_within_container=True
     ):
@@ -34,14 +35,14 @@ class Ball:
         elif isinstance(position, Vector3D):
             self.position = position
         else:
-            raise ValueError(f'position={position} is not a Vector3D instance')
+            raise ValueError(f'{position=} is not a Vector3D instance')
 
         if velocity is None:
             self.velocity = Vector3D()
         elif isinstance(velocity, Vector3D):
             self.velocity = velocity
         else:
-            raise ValueError(f'velocity={velocity} is not a Vector3D instance')
+            raise ValueError(f'{velocity=} is not a Vector3D instance')
 
         if radius is None:
             self.radius = DEFAULT_BALL_RADIUS
@@ -58,7 +59,14 @@ class Ball:
         elif isinstance(rgbcolor, Vector3D):
             self.rgbcolor = rgbcolor
         else:
-            raise ValueError(f'rgbcolor={rgbcolor} is not a Vector3D instance')
+            raise ValueError(f'{rgbcolor=} is not a Vector3D instance')
+        
+        if rgbcolor_on_speed is None:
+            self.rgbcolor_on_speed = None
+        elif isinstance(rgbcolor_on_speed, Vector3D):
+            self.rgbcolor_on_speed = rgbcolor_on_speed
+        else:
+            raise ValueError(f'{rgbcolor_on_speed=} is not None nor a Vector3D instance')        
 
         if container is None:
             container = Cuboid3D()
@@ -85,6 +93,7 @@ class Ball:
         output += f'    radius = {self.radius}\n'
         output += f'    mass = {self.mass}\n'
         output += f'    rgbcolor = {repr(self.rgbcolor)},\n'
+        output += f'    rgbcolor_on_speed = {repr(self.rgbcolor_on_speed)},\n'
         output += f'    container = {repr(self.container)}'
         return output
 
@@ -95,6 +104,7 @@ class Ball:
         output += f'    radius = {self.radius},\n'
         output += f'    mass = {self.mass},\n'
         output += f'    rgbcolor = {repr(self.rgbcolor)},\n'
+        output += f'    rgbcolor_on_speed = {repr(self.rgbcolor_on_speed)},\n'
         output += f'    container = {repr(self.container)}\n'
         output += ')'
         return output
@@ -114,6 +124,9 @@ class Ball:
         self.position.x = np.round(self.position.x + self.velocity.x * t, nround)
         self.position.y = np.round(self.position.y + self.velocity.y * t, nround)
         self.position.z = np.round(self.position.z + self.velocity.z * t, nround)
+        if self.rgbcolor_on_speed is not None:
+            if (self.velocity.x**2 + self.velocity.y**2 + self.velocity.z**2) > 0:
+                self.rgbcolor = self.rgbcolor_on_speed
 
     def time_to_collision_with_ball(self, newball, nround=12):
         vx_relative = self.velocity.x - newball.velocity.x
@@ -167,6 +180,10 @@ class Ball:
         newball.velocity.x = np.round(newball.velocity.x - corr2 * delta_x, nround)
         newball.velocity.y = np.round(newball.velocity.y - corr2 * delta_y, nround)
         newball.velocity.z = np.round(newball.velocity.z - corr2 * delta_z, nround)
+        if newball.rgbcolor_on_speed is not None:
+            if (newball.velocity.x**2 + newball.velocity.y**2 + newball.velocity.z**2) > 0:
+                newball.rgbcolor = newball.rgbcolor_on_speed
+
 
 
 class BallCollection:

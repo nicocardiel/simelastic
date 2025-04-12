@@ -256,13 +256,14 @@ def main():
         box2 = Cuboid3D(xmin=-1, xmax=1, ymin=-1, ymax=1, zmin=-1, zmax=1)
         box3 = Cuboid3D(xmin=1, xmax=xmax, ymin=-1, ymax=1, zmin=-1, zmax=1)
         box = Cuboid3D(xmin=xmin, xmax=xmax, ymin=-1, ymax=1, zmin=-1, zmax=1)
-        radius = 0.10
+        radius = 0.28
         balls1 = random_balls_in_empty_container(
             container=box1,
             nballs=170,
             radius=radius,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
+            rgbcolor_on_speed=Vector3D(0.0, 1.0, 0.0),
             debug=False
         )
         balls2 = random_balls_in_empty_container(
@@ -279,6 +280,7 @@ def main():
             radius=radius,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
+            rgbcolor_on_speed=Vector3D(0.0, 1.0, 0.0),
             debug=False
         )
         balls = balls1 + balls2 + balls3

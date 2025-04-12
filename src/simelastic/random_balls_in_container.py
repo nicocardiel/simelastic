@@ -24,6 +24,7 @@ def random_balls_in_empty_container(
         radius=None,
         random_speed=0,
         rgbcolor=None,
+        rgbcolor_on_speed=None,
         seed=1234,
         debug=False
 ):
@@ -66,6 +67,7 @@ def random_balls_in_empty_container(
             radius=radius,
             velocity=velocity,
             rgbcolor=rgbcolor,
+            rgbcolor_on_speed=rgbcolor_on_speed,
             container=container
         )
         ntrials += 1

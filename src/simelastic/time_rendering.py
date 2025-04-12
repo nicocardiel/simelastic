@@ -61,7 +61,10 @@ def time_rendering(
         xval = [dict_snapshots[t].dict[i].position.x for t in dict_snapshots]
         yval = [dict_snapshots[t].dict[i].position.y for t in dict_snapshots]
         zval = [dict_snapshots[t].dict[i].position.z for t in dict_snapshots]
-        f = interp1d(tvalues, np.array((xval, yval, zval)))
+        rcol = [dict_snapshots[t].dict[i].rgbcolor.x for t in dict_snapshots]
+        gcol = [dict_snapshots[t].dict[i].rgbcolor.y for t in dict_snapshots]
+        bcol = [dict_snapshots[t].dict[i].rgbcolor.z for t in dict_snapshots]
+        f = interp1d(tvalues, np.array((xval, yval, zval, rcol, gcol, bcol)))
         finterp_balls.append(f)
 
     print(f'Creating: {outfilename}')
@@ -217,6 +220,8 @@ Frame = <span id=d3></span>
             fball = finterp_balls[i]
             fvalues = fball(t)
             f.write(f'                    balls[{i}].position.set( {fvalues[0]}, {fvalues[1]}, {fvalues[2]} );\n')
+            b = dict_snapshots[0].dict[i]
+            f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {fvalues[3]}, {fvalues[4]}, {fvalues[5]});\n')
         f.write('                }\n')
 
     f.write("""
