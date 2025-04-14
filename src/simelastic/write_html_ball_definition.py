@@ -8,10 +8,13 @@
 # License-Filename: LICENSE
 #
 
-def write_html_ball_definition(f, nballs, dict_snapshots):
+def write_html_ball_definition(f, snapshot):
     """
     Write the ball definition in the HTML file.
     """
+
+    nballs = len(snapshot.dict)
+
     f.write(f"""
         // ---------------------------
         
@@ -20,7 +23,7 @@ def write_html_ball_definition(f, nballs, dict_snapshots):
 """)
 
     for i in range(nballs):
-        b = dict_snapshots[0].dict[i]
+        b = snapshot.dict[i]
         f.write(f"""
         var geometry = new THREE.SphereGeometry( {b.radius}, 36, 36 );
         var material = new THREE.MeshPhongMaterial();
@@ -32,4 +35,4 @@ def write_html_ball_definition(f, nballs, dict_snapshots):
         ball.mass = {b.mass};
         balls.push( ball );
         scene.add( ball );
-        """)
+""")

@@ -8,15 +8,24 @@
 # License-Filename: LICENSE
 #
 
-def write_html_header(f):
+def write_html_header(f, outtype=None, frameinfo=None):
     """
     Write the header of the HTML file.
     """
-    f.write("""<!DOCTYPE html>
+
+    if outtype is None:
+        raise ValueError(f'Undefined outtype')
+
+    if frameinfo is None:
+        frameinfo = ''
+    else:
+        frameinfo = f' ({frameinfo})'
+    f.write(f"""<!DOCTYPE html>
 <html>
 <head>
-<title>Elastic Collisions in 3D</title>
-<meta charset=utf-8>
+<title>Elastic Collisions in 3D{frameinfo}</title>""")
+    
+    f.write("""<meta charset=utf-8>
 <meta name=viewport content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <meta name=author content="Paul Masson (modified by Nicolas Cardiel)">
 <style>
@@ -35,5 +44,7 @@ Frame = <span id=d3></span>
 
 <!-- See https://exploratoria.github.io/exhibits/mechanics/elastic-collisions-in-3d/ -->
 <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/examples/js/controls/OrbitControls.js"></script>
+""")
+    if outtype == 'html':
+        f.write("""<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/examples/js/controls/OrbitControls.js"></script>
 """)

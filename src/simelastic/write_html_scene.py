@@ -8,10 +8,13 @@
 # License-Filename: LICENSE
 #
 
-def write_html_scene(f):
+def write_html_scene(f, outtype=None):
     """
     Write the scene of the HTML file.
     """
+    if outtype is None:
+        raise ValueError(f'Undefined outtype')
+    
     f.write("""
         // ---------------------------
 
@@ -29,7 +32,10 @@ def write_html_scene(f):
         var camera_z = camera_r * Math.sin(camera_theta)
         camera.position.set( camera_x, camera_y, camera_z );
         camera.lookAt( 0, 0, 0 );
-
+""")
+    
+    if outtype == 'html':
+        f.write("""
         var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
         window.addEventListener( 'resize', function() {

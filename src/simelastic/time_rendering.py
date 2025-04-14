@@ -8,11 +8,17 @@
 # License-Filename: LICENSE
 #
 
+import copy
 import numpy as np
+import os
+from pathlib import Path
+import shutil
 from scipy.interpolate import interp1d
+import subprocess
 from tqdm import tqdm
 
 from .container3D import Container3D
+from .write_dummy_js import write_dummy_js
 from .write_html_ball_definition import write_html_ball_definition
 from .write_html_camera import write_html_camera
 from .write_html_container import write_html_container
@@ -33,6 +39,7 @@ def time_rendering(
         camera_phi=45,
         camera_theta=30,
         camera_r=25,
+        dummydir=None,
         debug=False
 ):
     if not isinstance(dict_snapshots, dict):
@@ -41,6 +48,16 @@ def time_rendering(
         raise ValueError(f'container: {container} is not a Container3D instance')
     if outfilename is None:
         raise ValueError(f'Undefined outfilename')
+    else:
+        outfilename = Path(outfilename)
+        if outfilename.suffix.lower() == '.html':
+            outtype = 'html'
+        elif outfilename.suffix.lower() == '.mp4':
+            outtype = 'mp4'
+        else:
+            raise ValueError(f'outfilename: {outfilename} is not a HTML or MP4 file')
+        print(f'Output file type: {outtype}')
+        
     if tstep is None:
         raise ValueError(f'Undefined tstep')
 
@@ -77,28 +94,110 @@ def time_rendering(
         f = interp1d(tvalues, np.array((xval, yval, zval, rcol, gcol, bcol)))
         finterp_balls.append(f)
 
-    print(f'Creating: {outfilename}')
-    f = open(outfilename, 'wt')
+    if outtype == 'html':
+        print(f'Creating HTML output: {outfilename}')
+        f = open(outfilename, 'wt')
+        write_html_header(f, outtype=outtype)
+        write_html_camera(f, camera_phi, camera_theta, camera_r)
+        write_html_scene(f, outtype=outtype)
+        write_html_container(f, container)
+        print(f'- Defining balls')
+        write_html_ball_definition(f, snapshot=dict_snapshots[0])
+        write_html_render_start(f, ndelay_start)
+        print('- Creating frames')
+        for k in tqdm(range(len(tarray))):
+            t = tarray[k]
+            f.write(f'                if ( nframe == {k + 1} )' + ' {\n')
+            for i in range(nballs):
+                fball = finterp_balls[i]
+                fvalues = fball(t)
+                f.write(f'                    balls[{i}].position.set( {fvalues[0]}, {fvalues[1]}, {fvalues[2]} );\n')
+                f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {fvalues[3]}, {fvalues[4]}, {fvalues[5]});\n')
+            f.write('                }\n')
+        write_html_render_end(f, outtype=outtype)
+        f.close()
 
-    write_html_header(f)
-    write_html_camera(f, camera_phi, camera_theta, camera_r)
-    write_html_scene(f)
-    write_html_container(f, container)
-    print(f'- Defining balls')
-    write_html_ball_definition(f, nballs, dict_snapshots)
+    elif outtype == 'mp4':
+        # install puppeteer
+        command_line_list = ['npm', 'install', 'puppeteer']
+        if debug:
+            print(f'Installing puppeteer...')
+            print(' '.join(command_line_list))
+        sp = subprocess.run(command_line_list, capture_output=True, text=True)
+        if sp.returncode != 0:
+            print(f'Error installing puppeteer: {sp.stderr}')
+            raise SystemExit()
+        else:
+            if debug:
+                print(sp.stdout)
+                print('Puppeteer installed!')
+        # create dummydir
+        if dummydir is None:
+            dummydir = Path('dummydir')
+        else:
+            dummydir = Path(f'{dummydir}')
+        if dummydir.exists():
+            print(f'Directory {dummydir} already exists. All its content will be deleted.')
+            rmdir = input('Do you want to continue (y/[n])? ')
+            if rmdir.lower() == 'y':
+                shutil.rmtree(dummydir)
+            else:
+                raise SystemExit('End of program')
+        os.mkdir(dummydir)
+        # generate dummy JavaScript file
+        jsfile = Path('./dummy.js')
+        write_dummy_js(jsfile=jsfile)
+        # renderize each frame
+        nframes = len(tarray)
+        nzeros = len(str(nframes))
+        for k in tqdm(range(10)):  #tqdm(range(len(tarray))):
+            t = tarray[k]
+            # generate dummy HTML file
+            f = open('dummy.html', 'wt')
+            write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}')
+            write_html_camera(f, camera_phi, camera_theta, camera_r)
+            write_html_scene(f, outtype=outtype)
+            write_html_container(f, container)
+            snapshot = copy.deepcopy(dict_snapshots[0])
+            for i in range(nballs):
+                fball = finterp_balls[i]
+                fvalues = fball(t)
+                b = snapshot.dict[i]
+                b.position.x = fvalues[0]
+                b.position.y = fvalues[1]
+                b.position.z = fvalues[2]
+                b.rgbcolor.x = fvalues[3]
+                b.rgbcolor.y = fvalues[4]
+                b.rgbcolor.z = fvalues[5]
+            write_html_ball_definition(f, snapshot=snapshot)
+            write_html_render_end(f, nframe=k, outtype=outtype)
+            f.close()
+            # renderize HTML file
+            command_line_list = ['node', jsfile.name]
+            sp = subprocess.run(command_line_list, capture_output=True, text=True)
+            if sp.returncode != 0:
+                print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
+                raise SystemExit()
+            command_line_list = ['mv', 'image.png', f'dummydir/frame_{str(k).zfill(nzeros)}.png']
+            sp = subprocess.run(command_line_list, capture_output=True, text=True)
+            if sp.returncode != 0:
+                print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
+                raise SystemExit()
+        # create mp4 file
+        command_line_list = ['ffmpeg', 
+                             '-y',  # overwrite output file
+                             '-framerate', '1', 
+                             '-i', f'dummydir/frame_%0{nzeros}d.png', 
+                             '-vcodec', 'libx264', '-r', '30', '-crf', '0',
+                             '-preset', 'veryslow',
+                               outfilename.name]
+        print(' '.join(command_line_list))
+        sp = subprocess.run(command_line_list, capture_output=True, text=True)
+        if sp.returncode != 0:
+            print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
+            raise SystemExit()
+        print(f'File {outfilename} created!')
 
-    write_html_render_start(f, ndelay_start)
-
-    print('- Creating frames')
-    for k in tqdm(range(len(tarray))):
-        t = tarray[k]
-        f.write(f'                if ( nframe == {k + 1} )' + ' {\n')
-        for i in range(nballs):
-            fball = finterp_balls[i]
-            fvalues = fball(t)
-            f.write(f'                    balls[{i}].position.set( {fvalues[0]}, {fvalues[1]}, {fvalues[2]} );\n')
-            f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {fvalues[3]}, {fvalues[4]}, {fvalues[5]});\n')
-        f.write('                }\n')
-
-    write_html_render_end(f)
-    f.close()
+    else:
+        raise ValueError(f'outtype: {outtype} is not a HTML or MP4 file')
+    

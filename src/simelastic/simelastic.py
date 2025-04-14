@@ -34,9 +34,10 @@ def main():
     parser = argparse.ArgumentParser(description=f"Simulation of elastic collisions (version {version})")
     parser.add_argument("-n", "--nexample", help="Example number", type=int, default=0)
     parser.add_argument("-p", "--pickle", help="Input/Output pickle file name", type=str, default="None")
-    parser.add_argument("-o", "--output", help="Output HTML/mp4 file name", type=str, default="None")
+    parser.add_argument("-o", "--output", help="Output HTML/MP4 file name", type=str, default="None")
     parser.add_argument("-t", "--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
     parser.add_argument("--ndelay_start", help="Delay start (default 500)", type=int, default=500)
+    parser.add_argument("--debug", help="Debug mode (default False)", action="store_true")
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -50,7 +51,7 @@ def main():
             print('ERROR: no input pickle file name provided')
             raise SystemExit()
         if args.output.lower() == 'none':
-            print('ERROR: no output HTML file name provided')
+            print('ERROR: no output HTML or MP4 file name provided')
             raise SystemExit()
         with open(args.pickle, 'rb') as f:
             pickle_object = pickle.load(f)
@@ -61,7 +62,7 @@ def main():
             tstep=args.tstep,
             ndelay_start=args.ndelay_start,
             outfilename=args.output,
-            debug=True
+            debug=args.debug
         )
         raise SystemExit('End of program')
     else:
@@ -90,7 +91,7 @@ def main():
             dict_snapshots=None,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
 
     elif nexample == 2:
@@ -100,14 +101,14 @@ def main():
             nballs=100,
             random_speed=0.1,
             rgbcolor='random',
-            debug=False
+            debug=args.debug
         )
         balls.dict[0].rgbcolor = Vector3D(1.0, 0.0, 0.0)
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
 
     elif nexample == 3:
@@ -121,21 +122,21 @@ def main():
             nballs=50,
             random_speed=0.02,
             rgbcolor=Vector3D(1.0, 0.0, 0.0),
-            debug=False
+            debug=args.debug
         )
         balls2 = random_balls_in_empty_container(
             container=box2,
             nballs=20,
             random_speed=0.1,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
-            debug=False
+            debug=args.debug
         )
         balls = balls1 + balls2
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
         for idball in balls.dict:
             b = balls.dict[idball]
@@ -144,7 +145,7 @@ def main():
             dict_snapshots=dict_snapshots,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
 
     elif nexample == 4:
@@ -160,7 +161,7 @@ def main():
             radius=0.4,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
-            debug=False
+            debug=args.debug
         )
         balls2 = random_balls_in_empty_container(
             container=box2,
@@ -168,7 +169,7 @@ def main():
             radius=0.4,
             random_speed=0.10,
             rgbcolor=Vector3D(1.0, 0.0, 0.0),
-            debug=False
+            debug=args.debug
         )
         balls3 = random_balls_in_empty_container(
             container=box3,
@@ -176,14 +177,14 @@ def main():
             radius=0.4,
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
-            debug=False
+            debug=args.debug
         )
         balls = balls1 + balls2 + balls3
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
         for idball in balls.dict:
             b = balls.dict[idball]
@@ -192,7 +193,7 @@ def main():
             dict_snapshots=dict_snapshots,
             balls=balls,
             time_interval=1000,
-            debug=False
+            debug=args.debug
         )
 
     elif nexample == 5:
@@ -210,7 +211,7 @@ def main():
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
             rgbcolor_on_speed=Vector3D(0.0, 1.0, 0.0),
-            debug=False
+            debug=args.debug
         )
         balls2 = random_balls_in_empty_container(
             container=box2,
@@ -218,7 +219,7 @@ def main():
             radius=radius,
             random_speed=0.10,
             rgbcolor=Vector3D(1.0, 0.0, 0.0),
-            debug=False
+            debug=args.debug
         )
         balls3 = random_balls_in_empty_container(
             container=box3,
@@ -227,14 +228,14 @@ def main():
             random_speed=0.00,
             rgbcolor=Vector3D(0.0, 0.0, 1.0),
             rgbcolor_on_speed=Vector3D(0.0, 1.0, 0.0),
-            debug=False
+            debug=args.debug
         )
         balls = balls1 + balls2 + balls3
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
             time_interval=20,
-            debug=False
+            debug=args.debug
         )
         for idball in balls.dict:
             b = balls.dict[idball]
@@ -243,7 +244,7 @@ def main():
             dict_snapshots=dict_snapshots,
             balls=balls,
             time_interval=50,
-            debug=False
+            debug=args.debug
         )
 
     else:
@@ -262,7 +263,7 @@ def main():
                 container=box,
                 tstep=args.tstep,
                 outfilename=args.output,
-                debug=True
+                debug=args.debug
             )
 
     print('End of program')
