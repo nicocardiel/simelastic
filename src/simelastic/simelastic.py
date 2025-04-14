@@ -35,8 +35,10 @@ def main():
     parser.add_argument("-n", "--nexample", help="Example number", type=int, default=0)
     parser.add_argument("-p", "--pickle", help="Input/Output pickle file name", type=str, default="None")
     parser.add_argument("-o", "--output", help="Output HTML/MP4 file name", type=str, default="None")
-    parser.add_argument("-t", "--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
-    parser.add_argument("--ndelay_start", help="Delay start (default 500)", type=int, default=500)
+    parser.add_argument("--tmin", help="Minimum time (default None)", type=float, default=None)
+    parser.add_argument("--tmax", help="Maximum time (default None)", type=float, default=None)
+    parser.add_argument("--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
+    parser.add_argument("--ndelay_start", help="Delay start (default 0)", type=int, default=0)
     parser.add_argument("--debug", help="Debug mode (default False)", action="store_true")
     args = parser.parse_args()
 
@@ -61,6 +63,8 @@ def main():
             container=pickle_object['container'],
             tstep=args.tstep,
             ndelay_start=args.ndelay_start,
+            tmin=args.tmin,
+            tmax=args.tmax,
             outfilename=args.output,
             debug=args.debug
         )

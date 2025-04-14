@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2023 Nicolás Cardiel
+# Copyright 2023-2025 Nicolás Cardiel
 #
 # This file is part of simelastic
 #
@@ -13,7 +13,6 @@ import numpy as np
 import os
 from pathlib import Path
 import shutil
-from scipy.interpolate import interp1d
 import subprocess
 from tqdm import tqdm
 
@@ -36,9 +35,9 @@ def time_rendering(
         tstep=1,
         ndelay_start=500,
         outfilename=None,
-        camera_phi=45,
-        camera_theta=30,
-        camera_r=25,
+        fcamera_phi=None,
+        fcamera_theta=None,
+        fcamera_r=None,
         dummydir=None,
         debug=False
 ):
@@ -70,14 +69,26 @@ def time_rendering(
     if tmax is None:
         tmax = max(tvalues)
     tarray = np.arange(tmin, tmax, tstep)
+    nframes = len(tarray)
 
-    if debug:
-        print(f'tmin............: {tmin}')
-        print(f'tmax............: {tmax}')
-        print(f'tstep...........: {tstep}')
-        print(f'number of frames: {len(tarray)}')
+    print(f'tmin............: {tmin}')
+    print(f'tmax............: {tmax}')
+    print(f'tstep...........: {tstep}')
+    print(f'number of frames: {nframes}')
 
-    nballs = dict_snapshots[tmin].nballs
+    # define constant camera values when time functions are not provided
+    if fcamera_phi is None:
+        def fcamera_phi(t):
+            return 45
+    if fcamera_theta is None:
+        def fcamera_theta(t):
+            return 30
+    if fcamera_r is None:
+        def fcamera_r(t):
+            return 25
+
+    dummykey = list(dict_snapshots.keys())[0]
+    nballs = dict_snapshots[dummykey].nballs
 
     finterp_balls = []
 
@@ -90,29 +101,33 @@ def time_rendering(
         rcol = [dict_snapshots[t].dict[i].rgbcolor.x for t in dict_snapshots]
         gcol = [dict_snapshots[t].dict[i].rgbcolor.y for t in dict_snapshots]
         bcol = [dict_snapshots[t].dict[i].rgbcolor.z for t in dict_snapshots]
-        # interpolation function
-        f = interp1d(tvalues, np.array((xval, yval, zval, rcol, gcol, bcol)))
-        finterp_balls.append(f)
+        # interpolation functions
+        fxval = np.interp(tarray, tvalues, xval)
+        fyval = np.interp(tarray, tvalues, yval)
+        fzval = np.interp(tarray, tvalues, zval)
+        frcol = np.interp(tarray, tvalues, rcol)
+        fgcol = np.interp(tarray, tvalues, gcol)
+        fbcol = np.interp(tarray, tvalues, bcol)
+        finterp_balls.append([fxval, fyval, fzval, frcol, fgcol, fbcol])
 
     if outtype == 'html':
         print(f'Creating HTML output: {outfilename}')
         f = open(outfilename, 'wt')
         write_html_header(f, outtype=outtype)
-        write_html_camera(f, camera_phi, camera_theta, camera_r)
+        write_html_camera(f, fcamera_phi(tmin), fcamera_theta(tmin), fcamera_r(tmin))
         write_html_scene(f, outtype=outtype)
         write_html_container(f, container)
         print(f'- Defining balls')
         write_html_ball_definition(f, snapshot=dict_snapshots[0])
         write_html_render_start(f, ndelay_start)
         print('- Creating frames')
-        for k in tqdm(range(len(tarray))):
+        for k in tqdm(range(nframes)):
             t = tarray[k]
             f.write(f'                if ( nframe == {k + 1} )' + ' {\n')
             for i in range(nballs):
-                fball = finterp_balls[i]
-                fvalues = fball(t)
-                f.write(f'                    balls[{i}].position.set( {fvalues[0]}, {fvalues[1]}, {fvalues[2]} );\n')
-                f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {fvalues[3]}, {fvalues[4]}, {fvalues[5]});\n')
+                fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
+                f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')
+                f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {frcol[k]}, {fgcol[k]}, {fbcol[k]});\n')
             f.write('                }\n')
         write_html_render_end(f, outtype=outtype)
         f.close()
@@ -148,27 +163,25 @@ def time_rendering(
         jsfile = Path('./dummy.js')
         write_dummy_js(jsfile=jsfile)
         # renderize each frame
-        nframes = len(tarray)
         nzeros = len(str(nframes))
-        for k in tqdm(range(10)):  #tqdm(range(len(tarray))):
+        for k in tqdm(range(nframes)):
             t = tarray[k]
             # generate dummy HTML file
             f = open('dummy.html', 'wt')
             write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}')
-            write_html_camera(f, camera_phi, camera_theta, camera_r)
+            write_html_camera(f, fcamera_phi(t), fcamera_theta(t), fcamera_r(t))
             write_html_scene(f, outtype=outtype)
             write_html_container(f, container)
             snapshot = copy.deepcopy(dict_snapshots[0])
             for i in range(nballs):
-                fball = finterp_balls[i]
-                fvalues = fball(t)
+                fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
                 b = snapshot.dict[i]
-                b.position.x = fvalues[0]
-                b.position.y = fvalues[1]
-                b.position.z = fvalues[2]
-                b.rgbcolor.x = fvalues[3]
-                b.rgbcolor.y = fvalues[4]
-                b.rgbcolor.z = fvalues[5]
+                b.position.x = fxval[k]
+                b.position.y = fyval[k]
+                b.position.z = fzval[k]
+                b.rgbcolor.x = frcol[k]
+                b.rgbcolor.y = fgcol[k]
+                b.rgbcolor.z = fbcol[k]
             write_html_ball_definition(f, snapshot=snapshot)
             write_html_render_end(f, nframe=k, outtype=outtype)
             f.close()
