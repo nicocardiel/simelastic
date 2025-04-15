@@ -185,7 +185,26 @@ def time_rendering(
                 b.rgbcolor.y = fgcol[k]
                 b.rgbcolor.z = fbcol[k]
             write_html_ball_definition(f, snapshot=snapshot)
-            write_html_render_end(f, nframe=k, outtype=outtype)
+            f.write('        // ---\n\n')
+            f.write('        renderer.render(scene, camera);\n\n')
+            f.write('        // ---\n\n')
+            f.write(f'        var nframe = {k};\n')
+            f.write('        disp_nframe.innerHTML = nframe.toString();\n')
+            camera_phi, camera_theta, camera_r, camera_lookat_x, camera_lookat_y, camera_lookat_z = fcamera(t)
+            f.write(f'        var phi = {camera_phi};\n')
+            f.write(f'        var theta = {camera_theta};\n')
+            f.write(f'        var r = {camera_r};\n')
+            f.write(f'        camera.position.set( r * Math.cos( phi * deg2rad) * Math.cos( theta * deg2rad ),\n')
+            f.write(f'                             r * Math.sin( phi * deg2rad) * Math.cos( theta * deg2rad ),\n')
+            f.write(f'                             r * Math.sin( theta ) );\n')
+            f.write(f'        camera.lookAt( {camera_lookat_x}, {camera_lookat_y}, {camera_lookat_z} );\n')
+            f.write(f'        var frametime = {t};\n')
+            f.write('        disp_time.innerHTML = frametime.toFixed(4);\n')
+            f.write('        disp_camera_phi.innerHTML = phi.toFixed(2);\n')
+            f.write('        disp_camera_theta.innerHTML = theta.toFixed(2);\n')
+            f.write('        disp_camera_r.innerHTML = r.toFixed(4);\n')
+
+            write_html_render_end(f, outtype=outtype)
             f.close()
             # renderize HTML file
             command_line_list = ['node', jsfile.name]
@@ -193,7 +212,7 @@ def time_rendering(
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
                 raise SystemExit()
-            command_line_list = ['mv', 'image.png', f'dummydir/frame_{str(k).zfill(nzeros)}.png']
+            command_line_list = ['mv', 'image.png', f'{dummydir}/frame_{str(k).zfill(nzeros)}.png']
             sp = subprocess.run(command_line_list, capture_output=True, text=True)
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
@@ -202,7 +221,7 @@ def time_rendering(
         command_line_list = ['ffmpeg', 
                              '-y',  # overwrite output file
                              '-framerate', '1', 
-                             '-i', f'dummydir/frame_%0{nzeros}d.png', 
+                             '-i', f'{dummydir}/frame_%0{nzeros}d.png', 
                              '-vcodec', 'libx264', '-r', '30', '-crf', '0',
                              '-preset', 'veryslow',
                                outfilename.name]

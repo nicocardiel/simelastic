@@ -37,9 +37,8 @@ def write_html_header(f, outtype=None, frameinfo=None):
 <body>
 
 <div id=display>
-&nbsp;&nbsp;&nbsp;<i>E</i> = <span id=disp_e></span><br>
-&Delta;<i>E</i> = <span id=disp_delta_e></span><br>
 Frame = <span id=disp_nframe></span><br>
+&Sigma;<i>K</i> = <span id=disp_kinetic></span><br>
 Time = <span id=disp_time></span><br>
 phi&nbsp;&nbsp;&nbsp; = <span id=disp_camera_phi></span><br>
 theta = <span id=disp_camera_theta></span><br>
