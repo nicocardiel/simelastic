@@ -127,6 +127,8 @@ def time_rendering(
             f.write(f'                                         {camera_r} * Math.sin( {camera_phi} * deg2rad ) * Math.cos( {camera_theta} * deg2rad ),\n')
             f.write(f'                                         {camera_r} * Math.sin( {camera_theta} * deg2rad ) );\n')
             f.write(f'                    camera.lookAt( {camera_lookat_x}, {camera_lookat_y}, {camera_lookat_z} );\n')
+            f.write(f'                    var frametime = {t};\n')
+            f.write('                    disp_time.innerHTML = frametime.toString();')
             for i in range(nballs):
                 fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
                 f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')

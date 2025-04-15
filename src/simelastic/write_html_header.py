@@ -40,6 +40,7 @@ def write_html_header(f, outtype=None, frameinfo=None):
 &nbsp;&nbsp;&nbsp;<i>E</i> = <span id=disp_e></span><br>
 &Delta;<i>E</i> = <span id=disp_delta_e></span><br>
 Frame = <span id=disp_nframe></span><br>
+Time = <span id=disp_time></span><br>
 phi&nbsp;&nbsp;&nbsp; = <span id=disp_camera_phi></span><br>
 theta = <span id=disp_camera_theta></span><br>
 r = <span id=disp_camera_r></span><br>
