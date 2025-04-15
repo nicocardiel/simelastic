@@ -37,14 +37,18 @@ def write_html_header(f, outtype=None, frameinfo=None):
 <body>
 
 <div id=display>
-<i>E</i> = <span id=d1></span><br>
-&Delta;<i>E</i> = <span id=d2></span><br>
-Frame = <span id=d3></span>
+&nbsp;&nbsp;&nbsp;<i>E</i> = <span id=disp_e></span><br>
+&Delta;<i>E</i> = <span id=disp_delta_e></span><br>
+Frame = <span id=disp_nframe></span><br>
+phi&nbsp;&nbsp;&nbsp; = <span id=disp_camera_phi></span><br>
+theta = <span id=disp_camera_theta></span><br>
+r = <span id=disp_camera_r></span><br>
 </div>
 
 <!-- See https://exploratoria.github.io/exhibits/mechanics/elastic-collisions-in-3d/ -->
 <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/build/three.min.js"></script>
 """)
+
     if outtype == 'html':
         f.write("""<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/examples/js/controls/OrbitControls.js"></script>
 """)

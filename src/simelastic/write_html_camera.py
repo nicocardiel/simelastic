@@ -18,9 +18,8 @@ def write_html_camera(f, camera_phi, camera_theta, camera_r):
         var deg2rad = Math.PI/180;
 
         // camera location
-        var camera_phi = {camera_phi}; 
+        var camera_phi = {camera_phi} * deg2rad; 
         var camera_theta = {camera_theta} * deg2rad;
-        var delta_camera_phi = 0;
         var camera_r = {camera_r};
         // ligth location
         var lightx = -5;
