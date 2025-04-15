@@ -9,6 +9,7 @@
 #
 
 import argparse
+import numpy as np
 import pickle
 import sys
 
@@ -58,20 +59,31 @@ def main():
         with open(args.pickle, 'rb') as f:
             pickle_object = pickle.load(f)
         print(f'Number of snapshots: {len(pickle_object['dict_snapshots'])}')
+        if args.tmin is None:
+            tmin = min(pickle_object['dict_snapshots'].keys())
+        else:
+            tmin = args.tmin
+        if args.tmax is None:
+            tmax = max(pickle_object['dict_snapshots'].keys())
+        else:
+            tmax = args.tmax
+        tstep = args.tstep
+        tarray = np.arange(tmin, tmax + tstep/2, tstep)
         time_rendering(
             dict_snapshots=pickle_object['dict_snapshots'],
             container=pickle_object['container'],
-            tstep=args.tstep,
+            tarray=tarray,
             ndelay_start=args.ndelay_start,
-            tmin=args.tmin,
-            tmax=args.tmax,
             outfilename=args.output,
             debug=args.debug
         )
         raise SystemExit('End of program')
     else:
-        if args.pickle.lower() == 'none' and args.output.lower() == 'none':
-            msg = 'ERROR: no output pickle and no output HTML file name provided'
+        if args.pickle.lower() == 'none':
+            msg = 'ERROR: no output pickle file name provided'
+            raise SystemExit(msg)
+        if args.output.lower() != 'none':
+            msg = 'ERROR: output HTML file name provided but nexample is not 0'
             raise SystemExit(msg)
 
     dict_snapshots = None
@@ -261,14 +273,6 @@ def main():
             with open(args.pickle, 'wb') as f:
                 pickle.dump(pickle_object, f)
             print(f'Pickle file {args.pickle} saved')
-        if args.output.lower() != 'none':
-            time_rendering(
-                dict_snapshots=dict_snapshots,
-                container=box,
-                tstep=args.tstep,
-                outfilename=args.output,
-                debug=args.debug
-            )
 
     print('End of program')
 

@@ -30,9 +30,7 @@ from .write_html_scene import write_html_scene
 def time_rendering(
         dict_snapshots=None,
         container=None,
-        tmin=None,
-        tmax=None,
-        tstep=1,
+        tarray=None,
         ndelay_start=0,
         outfilename=None,
         fcamera=None,
@@ -55,23 +53,22 @@ def time_rendering(
             raise ValueError(f'outfilename: {outfilename} is not a HTML or MP4 file')
         print(f'Output file type: {outtype}')
         
-    if tstep is None:
-        raise ValueError(f'Undefined tstep')
-
     tvalues = np.array([t for t in dict_snapshots.keys()])
     if debug:
         print(f'Number of frames in dict_snapshots: {len(tvalues)}')
 
-    if tmin is None:
+    if tarray is None:
         tmin = min(tvalues)
-    if tmax is None:
         tmax = max(tvalues)
-    tarray = np.arange(tmin, tmax, tstep)
+        tstep = 1.0
+        tarray = np.arange(tmin, tmax + tstep/2, tstep)
+    else:
+        tmin = tarray[0]
+        tmax = tarray[-1]
     nframes = len(tarray)
 
     print(f'tmin............: {tmin}')
     print(f'tmax............: {tmax}')
-    print(f'tstep...........: {tstep}')
     print(f'number of frames: {nframes}')
 
     # define constant camera values when time functions are not provided
@@ -128,7 +125,7 @@ def time_rendering(
             f.write(f'                                         {camera_r} * Math.sin( {camera_theta} * deg2rad ) );\n')
             f.write(f'                    camera.lookAt( {camera_lookat_x}, {camera_lookat_y}, {camera_lookat_z} );\n')
             f.write(f'                    var frametime = {t};\n')
-            f.write('                    disp_time.innerHTML = frametime.toString();')
+            f.write('                    disp_time.innerHTML = frametime.toFixed(4);')
             for i in range(nballs):
                 fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
                 f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')
