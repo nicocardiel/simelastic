@@ -32,11 +32,15 @@ def find_closest_on_the_right_side(x0, x_values, y_values):
     """Find the closest value in x_values that is less than or equal to x0.
     
     This function is necessary because velocities cannot be interpolated.
+    If there are not values in x_values that are less than or equal to x0,
+    the closest value that is greater than x0 is returned.
     """
     indices = np.where(x_values <= x0)[0]
     if len(indices) == 0:
-        raise ValueError(f'No values in x_values are less than or equal to {x0}')
-    closest_index = indices[-1]
+        indices = np.where(x_values >= x0)[0]
+        closest_index = indices[0]
+    else:
+        closest_index = indices[-1]
     return y_values[closest_index]
 
 
