@@ -8,6 +8,7 @@
 # License-Filename: LICENSE
 #
 
+from astropy.io import fits
 import copy
 import numpy as np
 import os
@@ -25,6 +26,18 @@ from .write_html_header import write_html_header
 from .write_html_render_start import write_html_render_start
 from .write_html_render_end import write_html_render_end
 from .write_html_scene import write_html_scene
+
+
+def find_closest_on_the_right_side(x0, x_values, y_values):
+    """Find the closest value in x_values that is less than or equal to x0.
+    
+    This function is necessary because velocities cannot be interpolated.
+    """
+    indices = np.where(x_values <= x0)[0]
+    if len(indices) == 0:
+        raise ValueError(f'No values in x_values are less than or equal to {x0}')
+    closest_index = indices[-1]
+    return y_values[closest_index]
 
 
 def time_rendering(
@@ -91,22 +104,29 @@ def time_rendering(
     finterp_balls = []
 
     for i in range(nballs):
-        # ball posistion
+        # ball position
         xval = [dict_snapshots[t].dict[i].position.x for t in dict_snapshots]
         yval = [dict_snapshots[t].dict[i].position.y for t in dict_snapshots]
         zval = [dict_snapshots[t].dict[i].position.z for t in dict_snapshots]
+        # ball velocity
+        vxval = [dict_snapshots[t].dict[i].velocity.x for t in dict_snapshots]
+        vyval = [dict_snapshots[t].dict[i].velocity.y for t in dict_snapshots]
+        vzval = [dict_snapshots[t].dict[i].velocity.z for t in dict_snapshots]
         # ball color
         rcol = [dict_snapshots[t].dict[i].rgbcolor.x for t in dict_snapshots]
         gcol = [dict_snapshots[t].dict[i].rgbcolor.y for t in dict_snapshots]
         bcol = [dict_snapshots[t].dict[i].rgbcolor.z for t in dict_snapshots]
-        # interpolation functions
+        # interpolated functions
         fxval = np.interp(tarray, tvalues, xval)
         fyval = np.interp(tarray, tvalues, yval)
         fzval = np.interp(tarray, tvalues, zval)
+        fvxval = np.array([find_closest_on_the_right_side(value, tvalues, vxval) for value in tarray])
+        fvyval = np.array([find_closest_on_the_right_side(value, tvalues, vyval) for value in tarray])
+        fvzval = np.array([find_closest_on_the_right_side(value, tvalues, vzval) for value in tarray])
         frcol = np.interp(tarray, tvalues, rcol)
         fgcol = np.interp(tarray, tvalues, gcol)
         fbcol = np.interp(tarray, tvalues, bcol)
-        finterp_balls.append([fxval, fyval, fzval, frcol, fgcol, fbcol])
+        finterp_balls.append([fxval, fyval, fzval, fvxval, fvyval, fvzval, frcol, fgcol, fbcol])
 
     if outtype == 'html':
         print(f'Creating HTML output: {outfilename}')
@@ -130,7 +150,7 @@ def time_rendering(
             f.write(f'                    var frametime = {t};\n')
             f.write('                    disp_time.innerHTML = frametime.toFixed(4);')
             for i in range(nballs):
-                fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
+                fxval, fyval, fzval, fvxval, fvyval, fvzval, frcol, fgcol, fbcol = finterp_balls[i]
                 f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')
                 f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {frcol[k]}, {fgcol[k]}, {fbcol[k]});\n')
             f.write('                }\n')
@@ -171,6 +191,7 @@ def time_rendering(
         write_dummy_js(jsfile=jsfile, width=width, height=height)
         # renderize each frame
         nzeros = len(str(nframes))
+        image2d_velocity = np.zeros((nframes, nballs))
         for k in tqdm(range(nframes)):
             t = tarray[k]
             # generate dummy HTML file
@@ -181,7 +202,7 @@ def time_rendering(
             write_html_container(f, container)
             snapshot = copy.deepcopy(dict_snapshots[0])
             for i in range(nballs):
-                fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
+                fxval, fyval, fzval, fvxval, fvyval, fvzval, frcol, fgcol, fbcol = finterp_balls[i]
                 b = snapshot.dict[i]
                 b.position.x = fxval[k]
                 b.position.y = fyval[k]
@@ -189,6 +210,7 @@ def time_rendering(
                 b.rgbcolor.x = frcol[k]
                 b.rgbcolor.y = fgcol[k]
                 b.rgbcolor.z = fbcol[k]
+                image2d_velocity[k, i] = np.sqrt(fvxval[k]**2 + fvyval[k]**2 + fvzval[k]**2)
             write_html_ball_definition(f, snapshot=snapshot)
             f.write('        // ---\n\n')
             f.write('        renderer.render(scene, camera);\n\n')
@@ -222,6 +244,13 @@ def time_rendering(
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
                 raise SystemExit()
+        # save FITS file with velocities
+        print(f'Creating FITS file with velocities: {workdir}/velocities.fits')
+        hdu = fits.PrimaryHDU(image2d_velocity)
+        hdu.header['NFRAMES'] = (nframes, 'Number of time frames')
+        hdu.header['NBALLS'] = (nballs, 'Number of balls')
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(f'{workdir}/velocities.fits', overwrite=True)
         # create mp4 file
         command_line_list = ['ffmpeg', 
                              '-y',  # overwrite output file
@@ -230,7 +259,8 @@ def time_rendering(
                              '-vcodec', 'libx264', '-r', '30', '-crf', '0',
                              '-preset', 'veryslow',
                                outfilename.name]
-        print(' '.join(command_line_list))
+        print(f'Creating MP4 file: {outfilename.name}')
+        print(f"$ {' '.join(command_line_list)}")
         sp = subprocess.run(command_line_list, capture_output=True, text=True)
         if sp.returncode != 0:
             print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
