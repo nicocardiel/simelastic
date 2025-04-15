@@ -32,9 +32,12 @@ def time_rendering(
         container=None,
         tarray=None,
         ndelay_start=0,
+        fontsize=20,
         outfilename=None,
         fcamera=None,
         dummydir=None,
+        width=1600,
+        height=900,
         debug=False
 ):
     if not isinstance(dict_snapshots, dict):
@@ -108,7 +111,7 @@ def time_rendering(
     if outtype == 'html':
         print(f'Creating HTML output: {outfilename}')
         f = open(outfilename, 'wt')
-        write_html_header(f, outtype=outtype)
+        write_html_header(f, outtype=outtype, fontsize=fontsize)
         write_html_camera(f, fcamera(tmin), outtype=outtype)
         write_html_scene(f)
         write_html_container(f, container)
@@ -165,14 +168,14 @@ def time_rendering(
         os.mkdir(dummydir)
         # generate dummy JavaScript file
         jsfile = Path('./dummy.js')
-        write_dummy_js(jsfile=jsfile)
+        write_dummy_js(jsfile=jsfile, width=width, height=height)
         # renderize each frame
         nzeros = len(str(nframes))
         for k in tqdm(range(nframes)):
             t = tarray[k]
             # generate dummy HTML file
             f = open('dummy.html', 'wt')
-            write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}')
+            write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}', fontsize=fontsize)
             write_html_camera(f, fcamera(t), outtype=outtype)
             write_html_scene(f)
             write_html_container(f, container)

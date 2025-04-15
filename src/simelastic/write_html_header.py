@@ -29,12 +29,12 @@ def write_html_header(f, outtype=None, frameinfo=None, fontsize=20):
 <meta name=author content="Paul Masson (modified by Nicolas Cardiel)">
 <style>
     body {{ margin: 0px; overflow: hidden; }}
-    #display_nframe       {{ position: absolute; margin: .25in; left:  0.0in; color: white; font-size: {fontsize}pt; }}
-    #display_kinetic      {{ position: absolute; margin: .25in; left:  2.0in; color: white; font-size: {fontsize}pt; }}
-    #display_time         {{ position: absolute; margin: .25in; left:  4.0in; color: white; font-size: {fontsize}pt; }}
-    #display_camera_phi   {{ position: absolute; margin: .25in; left:  6.0in; color: white; font-size: {fontsize}pt; }}
-    #display_camera_theta {{ position: absolute; margin: .25in; left:  8.0in; color: white; font-size: {fontsize}pt; }}
-    #display_camera_r     {{ position: absolute; margin: .25in; left: 10.0in; color: white; font-size: {fontsize}pt; }}
+    #display_nframe       {{ position: absolute; margin: .25in; left:  0.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
+    #display_kinetic      {{ position: absolute; margin: .25in; left:  2.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
+    #display_time         {{ position: absolute; margin: .25in; left:  4.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
+    #display_camera_phi   {{ position: absolute; margin: .25in; left:  6.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
+    #display_camera_theta {{ position: absolute; margin: .25in; left:  8.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
+    #display_camera_r     {{ position: absolute; margin: .25in; left: 10.0in; top: 0.0in; color: white; font-size: {fontsize}pt; }}
 </style>
 </head>
 

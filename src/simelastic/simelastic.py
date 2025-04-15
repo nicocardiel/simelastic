@@ -36,9 +36,13 @@ def main():
     parser.add_argument("-n", "--nexample", help="Example number", type=int, default=0)
     parser.add_argument("-p", "--pickle", help="Input/Output pickle file name", type=str, default="None")
     parser.add_argument("-o", "--output", help="Output HTML/MP4 file name", type=str, default="None")
+    parser.add_argument("--width", help="Width of the PNG frames (default 1600)", type=int, default=1600)
+    parser.add_argument("--height", help="Height of the PNG frames (default 900)", type=int, default=900)
+    parser.add_argument("--fps", help="Frames per second for MP4 output (default 30)", type=int, default=30)
     parser.add_argument("--tmin", help="Minimum time (default None)", type=float, default=None)
     parser.add_argument("--tmax", help="Maximum time (default None)", type=float, default=None)
     parser.add_argument("--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
+    parser.add_argument("--fontsize", help="Font size for HTML output (default 20)", type=int, default=20)
     parser.add_argument("--ndelay_start", help="Delay start (default 0)", type=int, default=0)
     parser.add_argument("--debug", help="Debug mode (default False)", action="store_true")
     args = parser.parse_args()
@@ -74,7 +78,10 @@ def main():
             container=pickle_object['container'],
             tarray=tarray,
             ndelay_start=args.ndelay_start,
+            fontsize=args.fontsize,
             outfilename=args.output,
+            width=args.width,
+            height=args.height,
             debug=args.debug
         )
         raise SystemExit('End of program')
