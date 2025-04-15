@@ -43,7 +43,7 @@ def run_simulation(
 
     print(f'Running simulation from time {tstart} to {tstart + time_interval}...')
     # main loop
-    while ttotal < tstart + time_interval:
+    while ttotal <= tstart + time_interval:
         if nballs > 0:
             # collision with container: minimum time to next collision
             # of any ball with the container walls; several balls can hit

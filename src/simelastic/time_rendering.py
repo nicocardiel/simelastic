@@ -33,11 +33,9 @@ def time_rendering(
         tmin=None,
         tmax=None,
         tstep=1,
-        ndelay_start=500,
+        ndelay_start=0,
         outfilename=None,
-        fcamera_phi=None,
-        fcamera_theta=None,
-        fcamera_r=None,
+        fcamera=None,
         dummydir=None,
         debug=False
 ):
@@ -77,15 +75,15 @@ def time_rendering(
     print(f'number of frames: {nframes}')
 
     # define constant camera values when time functions are not provided
-    if fcamera_phi is None:
-        def fcamera_phi(t):
-            return 45
-    if fcamera_theta is None:
-        def fcamera_theta(t):
-            return 30
-    if fcamera_r is None:
-        def fcamera_r(t):
-            return 25
+    if fcamera is None:
+        def fcamera(t):
+            camera_phi = 45
+            camera_theta = 30
+            camera_r = 25
+            camera_lookat_x = 0
+            camera_lookat_y = 0
+            camera_lookat_z = 0
+            return camera_phi, camera_theta, camera_r, camera_lookat_x, camera_lookat_y, camera_lookat_z
 
     dummykey = list(dict_snapshots.keys())[0]
     nballs = dict_snapshots[dummykey].nballs
@@ -114,7 +112,7 @@ def time_rendering(
         print(f'Creating HTML output: {outfilename}')
         f = open(outfilename, 'wt')
         write_html_header(f, outtype=outtype)
-        write_html_camera(f, fcamera_phi(tmin), fcamera_theta(tmin), fcamera_r(tmin))
+        write_html_camera(f, fcamera(tmin))
         write_html_scene(f, outtype=outtype)
         write_html_container(f, container)
         print(f'- Defining balls')
@@ -124,6 +122,11 @@ def time_rendering(
         for k in tqdm(range(nframes)):
             t = tarray[k]
             f.write(f'                if ( nframe == {k + 1} )' + ' {\n')
+            camera_phi, camera_theta, camera_r, camera_lookat_x, camera_lookat_y, camera_lookat_z = fcamera(t)
+            f.write(f'                    camera.position.set( {camera_r} * Math.cos( {camera_phi} * deg2rad ) * Math.cos( {camera_theta} * deg2rad ),\n')
+            f.write(f'                                         {camera_r} * Math.sin( {camera_phi} * deg2rad ) * Math.cos( {camera_theta} * deg2rad ),\n')
+            f.write(f'                                         {camera_r} * Math.sin( {camera_theta} * deg2rad ) );\n')
+            f.write(f'                    camera.lookAt( {camera_lookat_x}, {camera_lookat_y}, {camera_lookat_z} );\n')
             for i in range(nballs):
                 fxval, fyval, fzval, frcol, fgcol, fbcol = finterp_balls[i]
                 f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')
@@ -169,7 +172,7 @@ def time_rendering(
             # generate dummy HTML file
             f = open('dummy.html', 'wt')
             write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}')
-            write_html_camera(f, fcamera_phi(t), fcamera_theta(t), fcamera_r(t))
+            write_html_camera(f, fcamera(t))
             write_html_scene(f, outtype=outtype)
             write_html_container(f, container)
             snapshot = copy.deepcopy(dict_snapshots[0])

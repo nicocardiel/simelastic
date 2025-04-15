@@ -8,10 +8,13 @@
 # License-Filename: LICENSE
 #
 
-def write_html_camera(f, camera_phi, camera_theta, camera_r):
+def write_html_camera(f, fcamera):
     """
     Write the camera configuration in the HTML file.
     """
+
+    camera_phi, camera_theta, camera_r, camera_lookat_x, camera_lookat_y, camera_lookat_z = fcamera
+    
     f.write(f"""
 <script>
 
