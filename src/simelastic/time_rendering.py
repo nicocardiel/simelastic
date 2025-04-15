@@ -35,7 +35,7 @@ def time_rendering(
         fontsize=20,
         outfilename=None,
         fcamera=None,
-        dummydir=None,
+        workdir=None,
         width=1600,
         height=900,
         debug=False
@@ -154,18 +154,18 @@ def time_rendering(
                 print(sp.stdout)
                 print('Puppeteer installed!')
         # create dummydir
-        if dummydir is None:
-            dummydir = Path('dummydir')
+        if workdir is None:
+            workdir = Path('dummydir')
         else:
-            dummydir = Path(f'{dummydir}')
-        if dummydir.exists():
-            print(f'Directory {dummydir} already exists. All its content will be deleted.')
+            workdir = Path(f'{workdir}')
+        if workdir.exists():
+            print(f'Directory {workdir} already exists. All its content will be deleted.')
             rmdir = input('Do you want to continue (y/[n])? ')
             if rmdir.lower() == 'y':
-                shutil.rmtree(dummydir)
+                shutil.rmtree(workdir)
             else:
                 raise SystemExit('End of program')
-        os.mkdir(dummydir)
+        os.mkdir(workdir)
         # generate dummy JavaScript file
         jsfile = Path('./dummy.js')
         write_dummy_js(jsfile=jsfile, width=width, height=height)
@@ -217,7 +217,7 @@ def time_rendering(
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
                 raise SystemExit()
-            command_line_list = ['mv', 'image.png', f'{dummydir}/frame_{str(k).zfill(nzeros)}.png']
+            command_line_list = ['mv', 'image.png', f'{workdir}/frame_{str(k).zfill(nzeros)}.png']
             sp = subprocess.run(command_line_list, capture_output=True, text=True)
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
@@ -226,7 +226,7 @@ def time_rendering(
         command_line_list = ['ffmpeg', 
                              '-y',  # overwrite output file
                              '-framerate', '1', 
-                             '-i', f'{dummydir}/frame_%0{nzeros}d.png', 
+                             '-i', f'{workdir}/frame_%0{nzeros}d.png', 
                              '-vcodec', 'libx264', '-r', '30', '-crf', '0',
                              '-preset', 'veryslow',
                                outfilename.name]

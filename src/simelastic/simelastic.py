@@ -38,7 +38,7 @@ def main():
     parser.add_argument("-o", "--output", help="Output HTML/MP4 file name", type=str, default="None")
     parser.add_argument("--width", help="Width of the PNG frames (default 1600)", type=int, default=1600)
     parser.add_argument("--height", help="Height of the PNG frames (default 900)", type=int, default=900)
-    parser.add_argument("--fps", help="Frames per second for MP4 output (default 30)", type=int, default=30)
+    parser.add_argument("--workdir", help="Working directory (default 'dummydir')", type=str, default='dummydir')
     parser.add_argument("--tmin", help="Minimum time (default None)", type=float, default=None)
     parser.add_argument("--tmax", help="Maximum time (default None)", type=float, default=None)
     parser.add_argument("--tstep", help="Time step for rendering (default 1.0)", type=float, default=1.0)
@@ -80,6 +80,7 @@ def main():
             ndelay_start=args.ndelay_start,
             fontsize=args.fontsize,
             outfilename=args.output,
+            workdir=args.workdir,
             width=args.width,
             height=args.height,
             debug=args.debug
