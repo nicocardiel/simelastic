@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2023 Nicolás Cardiel
+# Copyright 2023-2025 Nicolás Cardiel
 #
 # This file is part of simelastic
 #
@@ -247,7 +247,7 @@ def main():
         dict_snapshots = run_simulation(
             dict_snapshots=dict_snapshots,
             balls=balls,
-            time_interval=50,
+            time_interval=300,
             debug=args.debug
         )
 
