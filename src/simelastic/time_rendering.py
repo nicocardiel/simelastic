@@ -109,8 +109,8 @@ def time_rendering(
         print(f'Creating HTML output: {outfilename}')
         f = open(outfilename, 'wt')
         write_html_header(f, outtype=outtype)
-        write_html_camera(f, fcamera(tmin))
-        write_html_scene(f, outtype=outtype)
+        write_html_camera(f, fcamera(tmin), outtype=outtype)
+        write_html_scene(f)
         write_html_container(f, container)
         print(f'- Defining balls')
         write_html_ball_definition(f, snapshot=dict_snapshots[0])
@@ -131,6 +131,8 @@ def time_rendering(
                 f.write(f'                    balls[{i}].position.set( {fxval[k]}, {fyval[k]}, {fzval[k]} );\n')
                 f.write(f'                    balls[{i}].material.color =  new THREE.Color().setRGB( {frcol[k]}, {fgcol[k]}, {fbcol[k]});\n')
             f.write('                }\n')
+        # camera looking at last position
+        f.write(f'                camera.lookAt( {camera_lookat_x}, {camera_lookat_y}, {camera_lookat_z} );\n')
         write_html_render_end(f, outtype=outtype)
         f.close()
 
@@ -171,8 +173,8 @@ def time_rendering(
             # generate dummy HTML file
             f = open('dummy.html', 'wt')
             write_html_header(f, outtype=outtype, frameinfo=f'Frame {k}, t={t}')
-            write_html_camera(f, fcamera(t))
-            write_html_scene(f, outtype=outtype)
+            write_html_camera(f, fcamera(t), outtype=outtype)
+            write_html_scene(f)
             write_html_container(f, container)
             snapshot = copy.deepcopy(dict_snapshots[0])
             for i in range(nballs):

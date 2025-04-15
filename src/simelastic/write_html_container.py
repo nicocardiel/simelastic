@@ -31,6 +31,9 @@ def write_html_container(f, container):
         var boxMesh = new THREE.Line( box );
         scene.add( new THREE.BoxHelper( boxMesh, 'white' ) );
         
+        var lightx = -5;
+        var lighty = 5;
+        var lightz = 0;
         var light = new THREE.DirectionalLight( 0xffffff, .8 );
         light.position.set( lightx, lighty, lightz );
         camera.add( light );
