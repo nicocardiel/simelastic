@@ -196,6 +196,9 @@ def time_rendering(
         # renderize each frame
         nzeros = len(str(nframes))
         image2d_velocity = np.zeros((nframes, nballs))
+        image2d_xpos = np.zeros((nframes, nballs))
+        image2d_ypos = np.zeros((nframes, nballs))
+        image2d_zpos = np.zeros((nframes, nballs))
         for k in tqdm(range(nframes)):
             t = tarray[k]
             # generate dummy HTML file
@@ -214,6 +217,9 @@ def time_rendering(
                 b.rgbcolor.x = frcol[k]
                 b.rgbcolor.y = fgcol[k]
                 b.rgbcolor.z = fbcol[k]
+                image2d_xpos[k, i] = fxval[k]
+                image2d_ypos[k, i] = fyval[k]
+                image2d_zpos[k, i] = fzval[k]
                 image2d_velocity[k, i] = np.sqrt(fvxval[k]**2 + fvyval[k]**2 + fvzval[k]**2)
             write_html_ball_definition(f, snapshot=snapshot)
             f.write('        // ---\n\n')
@@ -248,13 +254,32 @@ def time_rendering(
             if sp.returncode != 0:
                 print(f'Error executing {' '.join(command_line_list)}: {sp.stderr}')
                 raise SystemExit()
-        # save FITS file with velocities
+        # save FITS files with velocities
         print(f'Creating FITS file with velocities: {workdir}/velocities.fits')
         hdu = fits.PrimaryHDU(image2d_velocity)
         hdu.header['NFRAMES'] = (nframes, 'Number of time frames')
         hdu.header['NBALLS'] = (nballs, 'Number of balls')
         hdulist = fits.HDUList([hdu])
         hdulist.writeto(f'{workdir}/velocities.fits', overwrite=True)
+        # save FITS files with (X, Y, Z) positions
+        print(f'Creating FITS file with X positions: {workdir}/xpositions.fits')
+        hdu = fits.PrimaryHDU(image2d_xpos)
+        hdu.header['NFRAMES'] = (nframes, 'Number of time frames')
+        hdu.header['NBALLS'] = (nballs, 'Number of balls')
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(f'{workdir}/xpositions.fits', overwrite=True)
+        print(f'Creating FITS file with Y positions: {workdir}/ypositions.fits')
+        hdu = fits.PrimaryHDU(image2d_ypos)
+        hdu.header['NFRAMES'] = (nframes, 'Number of time frames')
+        hdu.header['NBALLS'] = (nballs, 'Number of balls')
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(f'{workdir}/ypositions.fits', overwrite=True)
+        print(f'Creating FITS file with Z positions: {workdir}/zpositions.fits')
+        hdu = fits.PrimaryHDU(image2d_zpos)
+        hdu.header['NFRAMES'] = (nframes, 'Number of time frames')
+        hdu.header['NBALLS'] = (nballs, 'Number of balls')
+        hdulist = fits.HDUList([hdu])
+        hdulist.writeto(f'{workdir}/zpositions.fits', overwrite=True)
         # create mp4 file
         command_line_list = ['ffmpeg', 
                              '-y',  # overwrite output file
