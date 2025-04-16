@@ -258,7 +258,7 @@ def main():
         dict_snapshots = run_simulation(
             dict_snapshots=None,
             balls=balls,
-            time_interval=20,
+            time_interval=100,
             debug=args.debug
         )
         for idball in balls.dict:
@@ -267,7 +267,7 @@ def main():
         dict_snapshots = run_simulation(
             dict_snapshots=dict_snapshots,
             balls=balls,
-            time_interval=300,
+            time_interval=600,
             debug=args.debug
         )
 
