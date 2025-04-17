@@ -21,8 +21,9 @@ const puppeteer = require('puppeteer');
     const page = await browser.newPage();
     await page.setViewport({{ width: {width}, height: {height} }}); // Set the desired width and height
 """)
-    f.write(f"""await page.goto('file://{jsfile.parent.absolute()}/dummy.html'""")
-    f.write(""", {waitUntil: 'load'});
+    f.write(f"""
+    await page.goto('file://{jsfile.parent.absolute()}/dummy.html'""")
+    f.write(""", {waitUntil: 'domcontentloaded'});
     // console.log(await page.title());
     await page.screenshot({ path: 'image.png' });
     await browser.close();
