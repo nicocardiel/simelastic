@@ -22,6 +22,7 @@ def random_balls_in_empty_container(
         container=None,
         nballs=1,
         radius=None,
+        mass=1,
         random_speed=0,
         rgbcolor=None,
         rgbcolor_on_speed=None,
@@ -65,6 +66,7 @@ def random_balls_in_empty_container(
         b = Ball(
             position=position,
             radius=radius,
+            mass=mass,
             velocity=velocity,
             rgbcolor=rgbcolor,
             rgbcolor_on_speed=rgbcolor_on_speed,
